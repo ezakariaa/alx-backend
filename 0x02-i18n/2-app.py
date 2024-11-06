@@ -1,35 +1,44 @@
 #!/usr/bin/env python3
-"""A babel and flask app"""
-
+"""
+Initialization of a Flask application with Babel for
+language selection based on the user's request.
+"""
 from flask import Flask, render_template, request
 from flask_babel import Babel
+from typing import Optional
+
+
+app = Flask(__name__)
 
 
 class Config:
     """
-    Setting the languages and the locale and timezone
+    Babel configuration with languages and default settings.
     """
-    LANGUAGES = ["en", "fr"]
-    BABEL_DEFAULT_LOCALE = "en"
-    BABEL_DEFAULT_TIMEZONE = "UTC"
+    LANGUAGES = ['en', 'fr']
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
 
-app = Flask(__name__)
+
 app.config.from_object(Config)
-app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'fr', 'es']
 babel = Babel(app)
 
-@app.route('/', strict_slashes=False)
-def hello_world():
-    """to run on the website"""
-    return render_template('2-index.html')
 
-def get_locale() -> str:
+@babel.localeselector
+def get_locale() -> Optional[str]:
     """
-    Determine the bestmatch with our supported languages
+    Selects the appropriate locale from the HTTP request.
     """
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
+@app.route('/')
+def index() -> str:
+    """
+    Displays the home page.
+    """
+    return render_template('2-index.html')
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='5000', debug=True)
+
+if __name__ == "__main__":
+    app.run()
